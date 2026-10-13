@@ -23,7 +23,7 @@ import { PreviewSession } from './lib/service/session'
 import { DEFAULTS, parseSettings } from './lib/service/settings'
 import type { Settings } from './lib/service/settings'
 import { placeholderFor } from './lib/view/labels'
-import { fitCells } from './lib/view/layout'
+import { HeldHeight, fitCells } from './lib/view/layout'
 import type { Cells } from './lib/view/layout'
 import { halfBlockCells, imageSource } from './lib/view/raster'
 import { ROWS_ABOVE_PICTURE, ROWS_BELOW_PICTURE, band, pictureElement } from './ui/band'
@@ -37,6 +37,8 @@ const CLIPBOARD_WORD = /(^|\s)@clipboard(?=\s|$)/i
 const CLIPBOARD_WORDS = /(^|\s)@clipboard(?=\s|$)/gi
 const GALLERY_SIDE = 768
 const BAND_PICTURE_SIDE = 384
+/** How long tiles keep their size after a picture is taken out of the prompt. */
+const HOLD_SIZE_MS = 5000
 
 const bandItems = atom({ plugin: 'image-preview', key: 'band' } as const, [] as PreviewItem[])
 const galleryItems = atom({ plugin: 'image-preview', key: 'gallery' } as const, [] as PreviewItem[])
@@ -51,6 +53,7 @@ let session: PreviewSession | null = null
 let overlay: PictureOverlay | null = null
 let settings: Settings = DEFAULTS
 let isTicking = false
+const heldHeight = new HeldHeight(HOLD_SIZE_MS)
 /** The band's instance id, which `$.ui.blit` needs for the renderer probe. */
 let bandRequest: string | null = null
 /** A picture drawn in the band, used to ask the terminal whether pictures show. */
@@ -215,6 +218,8 @@ async function tick($: EngineInterface): Promise<void> {
       if (merged !== null) await update($, galleryItems, () => merged)
     }
     await runProbe($)
+    // The tiles kept their size after a picture went: after a while they take the room there is.
+    if (heldHeight.isOver(await session.host.now())) $.ui.invalidate('ui.render')
   } catch (error) {
     $.ui.log(`refresh failed: ${String(error)}`, { to: 'debug' })
   } finally {
@@ -424,18 +429,21 @@ export const register: Register = (on, options) => {
     }
     if (items.length === 0 || isHidden) {
       overlay?.show([])
+      heldHeight.reset()
       return next(e)
     }
     bandRequest = e.requestId
     const ui = $.ui.resolve(e)
     let firstPicture: { key: string; source: ImageSource } | null = null
     const covered: OverlayTile[] = []
+    const held = heldHeight.limit(items.length, e.props.bodyColumns, await session.host.now())
     const tree = band({
       ui,
       items,
       maxRows: e.props.maxRows,
       maxColumns: e.props.bodyColumns,
-      tileRows: settings.tileRows,
+      tileRows: held === null ? settings.tileRows : Math.min(settings.tileRows, held),
+      onLayout: rows => heldHeight.drawn(items.length, rows, e.props.bodyColumns),
       picture: (item, cells, index) => {
         const picture = pictureFor($, item, cells, state, `band-${index}`, BAND_PICTURE_SIDE)
         if (picture.kind === 'image' && firstPicture === null)

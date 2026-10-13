@@ -50,6 +50,8 @@ tests/                unit, service (fake host) and mod tests (claude plugin tes
 6. **Draw.** The band lays the tiles out in the columns and rows the prompt area offers, shrinking tiles before
    dropping any, and draws each as an `Image` (real pixels) or a `Raster` of half blocks (two pixels per cell, 24-bit
    color). A picture whose pixels left the cache is decoded again in the background and swapped in place.
+   After a picture is taken out the others keep their height (`HeldHeight`) until five seconds pass without
+   another removal, the band's width changes or it empties.
 
 ## Renderer choice
 

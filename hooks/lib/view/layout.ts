@@ -13,6 +13,8 @@ export type TileLayout = {
   tiles: Cells[]
   /** Items left out at the end of the row. */
   hidden: number
+  /** The height the tiles were made for; a wide picture may take fewer rows. */
+  rows: number
 }
 
 export type LayoutOptions = {
@@ -62,20 +64,59 @@ export function layoutRow(sizes: readonly (Box2D | null)[], options: LayoutOptio
   const aspect = options.cellAspect ?? 2
   const chrome = TILE_BORDER_ROWS + options.textRows
   const tallest = Math.min(options.preferredRows, options.maxRows - chrome)
-  if (sizes.length === 0 || tallest < 1) return { tiles: [], hidden: sizes.length }
+  if (sizes.length === 0 || tallest < 1) return { tiles: [], hidden: sizes.length, rows: 0 }
   const shortest = Math.min(tallest, Math.max(1, options.minRows ?? 3))
   // One picture may take the whole width; several shrink together below.
   const widest = Math.max(MIN_TILE_COLUMNS, options.maxColumns - TILE_BORDER_COLUMNS)
 
   for (let rows = tallest; rows >= shortest; rows--) {
     const tiles = sizes.map(size => cellsFor(size, rows, widest, aspect))
-    if (rowWidth(tiles, 0) <= options.maxColumns) return { tiles, hidden: 0 }
+    if (rowWidth(tiles, 0) <= options.maxColumns) return { tiles, hidden: 0, rows }
   }
   // Too many to show readably: keep the first ones at the smallest height.
   const tiles = sizes.map(size => cellsFor(size, shortest, widest, aspect))
   let count = tiles.length
   while (count > 0 && rowWidth(tiles.slice(0, count), sizes.length - count) > options.maxColumns) count--
-  return { tiles: tiles.slice(0, count), hidden: sizes.length - count }
+  return { tiles: tiles.slice(0, count), hidden: sizes.length - count, rows: shortest }
+}
+
+/**
+ * Keeps the tiles' height while pictures are taken out of the prompt: the rest
+ * stay as they are, so the band does not jump and the next x is near where the
+ * last one was. When no picture has gone for `ms`, or the band's width
+ * changes or it empties, the tiles take the room there is again.
+ */
+export class HeldHeight {
+  private held: { rows: number; columns: number; until: number } | null = null
+  private last: { count: number; rows: number; columns: number } | null = null
+
+  constructor(private readonly ms: number) {}
+
+  /** The most rows a tile may take for `count` pictures in `columns`; null while nothing is held. */
+  limit(count: number, columns: number, now: number): number | null {
+    const held = this.held
+    if (count === 0 || (held !== null && (held.columns !== columns || now >= held.until))) this.held = null
+    const last = this.last
+    if (last !== null && count > 0 && count < last.count && last.columns === columns && last.rows > 0)
+      this.held = { rows: last.rows, columns, until: now + this.ms }
+    return this.held?.rows ?? null
+  }
+
+  /** What the band drew last: how many pictures, at what height, in how many columns. */
+  drawn(count: number, rows: number, columns: number): void {
+    this.last = { count, rows, columns }
+  }
+
+  /** Forgets everything: the band is empty or hidden, and the next pictures start afresh. */
+  reset(): void {
+    this.held = null
+    this.last = null
+  }
+
+  /** Whether a held height has run out by `now`, so the band should be drawn again. */
+  isOver(now: number): boolean {
+    return this.held !== null && now >= this.held.until
+  }
 }
 
 const MAX_IMAGE_CELLS = 255

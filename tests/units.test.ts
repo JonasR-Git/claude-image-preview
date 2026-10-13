@@ -31,7 +31,7 @@ import { parseSettings } from '../hooks/lib/service/settings'
 import { captureLabel } from '../hooks/lib/service/pictures'
 import { PreviewSession } from '../hooks/lib/service/session'
 import { fitText, humanBytes, labelFor } from '../hooks/lib/view/labels'
-import { cellsFor, fitCells, layoutRow } from '../hooks/lib/view/layout'
+import { HeldHeight, cellsFor, fitCells, layoutRow } from '../hooks/lib/view/layout'
 import { DEFAULT_COLOR, halfBlockCells } from '../hooks/lib/view/raster'
 import { fromBase64 } from '../hooks/lib/codec/base64'
 import type { PreviewItem } from '../types'
@@ -152,6 +152,28 @@ describe('layout', () => {
     ])
     // No room for even one row of picture.
     expect(layoutRow([square], { ...options, maxRows: 3 }).tiles).toEqual([])
+  })
+
+  test('keeps the height of the tiles for a while after a picture is taken out', () => {
+    const held = new HeldHeight(5000)
+    // Four pictures drawn at 8 rows in 100 columns; nothing held yet.
+    expect(held.limit(4, 100, 0)).toBe(null)
+    held.drawn(4, 8, 100)
+    // One taken out: the rest stay at 8 rows, again after a second removal.
+    expect(held.limit(3, 100, 1000)).toBe(8)
+    held.drawn(3, 8, 100)
+    expect(held.limit(2, 100, 3000)).toBe(8)
+    held.drawn(2, 8, 100)
+    // Five seconds after the last removal they take the room there is.
+    expect(held.isOver(7999)).toBe(false)
+    expect(held.isOver(8000)).toBe(true)
+    expect(held.limit(2, 100, 8000)).toBe(null)
+    // A new width lets go at once; so does an empty band.
+    held.drawn(2, 12, 100)
+    expect(held.limit(1, 100, 9000)).toBe(12)
+    expect(held.limit(1, 80, 9100)).toBe(null)
+    held.reset()
+    expect(held.limit(1, 80, 9200)).toBe(null)
   })
 
   test('fits a box without losing the shape', () => {

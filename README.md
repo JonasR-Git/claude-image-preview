@@ -79,7 +79,9 @@ The plugin keeps a cache of converted thumbnails and, on Windows, its compiled h
 | Dropped files in Git Bash   | A picture dragged into Git Bash arrives as a POSIX path; the paste is turned into an `@`-mention Claude Code attaches.     |
 | Diagnostics                 | `/image-preview status` shows platform, renderer, where pastes are found and which helper tools exist.                     |
 
-Each thumbnail has a title row: its label opens it in the gallery, the ✕ takes it out of the prompt. On
+Each thumbnail has a title row: its label opens it in the gallery, the ✕ takes it out of the prompt. The
+other thumbnails keep their size for five seconds after a ✕, so several can be taken out in a row without
+the band jumping. On
 Windows, where the real picture lies over the blocks, a click on the picture opens it in the default viewer.
 
 ### Commands

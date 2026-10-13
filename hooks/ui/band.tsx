@@ -19,6 +19,8 @@ export type BandProps = {
   maxRows: number
   maxColumns: number
   tileRows: number
+  /** Called with the height the tiles were made for. */
+  onLayout?: (rows: number) => void
   picture: (item: PreviewItem, cells: Cells, index: number) => Picture
   /** The label in a tile's title row: opens the picture in the gallery. */
   onPress: (item: PreviewItem) => void
@@ -79,6 +81,7 @@ export function band(props: BandProps): RenderElement | null {
       textRows: ROWS_ABOVE_PICTURE + ROWS_BELOW_PICTURE,
     },
   )
+  props.onLayout?.(layout.rows)
   if (layout.tiles.length === 0) return null
   const tallest = Math.max(...layout.tiles.map(tile => tile.rows))
 

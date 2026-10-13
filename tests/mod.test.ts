@@ -147,6 +147,34 @@ test('the x in a tile takes its picture out of the prompt', async ($, on) => {
   expect(await after.find({ type: 'Raster' })).toBeUndefined()
 })
 
+test('after an x the other tiles keep their size for five seconds', async ($, on) => {
+  const draft = { text: '[Image #1] [Image #2] [Image #3] compare' }
+  const { clock, files } = machine(on, draft)
+  files.set(`${IMAGES}/2.png`, PNG)
+  files.set(`${IMAGES}/3.png`, PNG)
+  on('prompt.fill', ($, e) => {
+    draft.text = e.text
+    return { isFilled: true }
+  })
+  const rows = async () => {
+    const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
+    const raster = await ui.find({ type: 'Raster' })
+    await ui.unmount()
+    return raster?.props.rows
+  }
+  await $.session.start({ surface: 'terminal', isInteractive: true, cwd: '/work' })
+  await clock.advance(300)
+  // Three pictures share the width at 12 rows; two alone would take 17.
+  expect(await rows()).toBe(12)
+  const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
+  await ui.press({ key: 'remove-0' })
+  await ui.unmount()
+  await clock.advance(300)
+  expect(await rows()).toBe(12)
+  await clock.advance(5000)
+  expect(await rows()).toBe(17)
+})
+
 test('a missing file is named in place of its picture', async ($, on) => {
   const { clock } = machine(on, { text: 'compare @missing.png' })
   await $.session.start({ surface: 'terminal', isInteractive: true, cwd: '/work' })
