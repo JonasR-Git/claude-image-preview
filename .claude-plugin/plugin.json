@@ -1,7 +1,7 @@
 {
   "name": "image-preview",
   "displayName": "Image Preview",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "See the pictures in your prompt: thumbnails above the prompt for pastes, @-mentioned files and the clipboard, with the real picture laid over them on Windows, plus a gallery and clipboard paste and copy. Windows, macOS, Linux and WSL.",
   "author": {
     "name": "JonasR",

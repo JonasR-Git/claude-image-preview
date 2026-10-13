@@ -13,7 +13,9 @@ It runs on **Windows, macOS, Linux and WSL**, needs no Node, Python or native ad
 BMP and WebP itself. On Windows, where no terminal can show pictures to Claude Code, it lays the real picture
 over its thumbnail, at full resolution.
 
-![Thumbnails of a pasted PNG, a WebP and a JPEG above the Claude Code prompt](docs/images/band.png)
+![Animated demo: a screenshot dragged into the terminal shows sharp above the Claude Code prompt](docs/images/demo.gif)
+
+[The demo in full quality (MP4, 48 seconds)](docs/images/demo.mp4)
 
 ## Requirements
 

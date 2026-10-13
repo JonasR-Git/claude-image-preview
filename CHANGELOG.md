@@ -1,9 +1,10 @@
 # Changelog
 
-## Unreleased
+## 1.1.1 – 2026-10-13
 
 - After a ✕ the other thumbnails keep their size for five seconds instead of growing at once, so the band
   does not jump and several pictures can be taken out in a row.
+- The README opens with a demo of what the plugin does.
 
 ## 1.1.0 – 2026-10-13
 
