@@ -1,0 +1,6 @@
+# Written by Claude Code each time it loads the mod from a --plugin-dir folder
+.claude-plugin/types/
+.claude/
+node_modules/
+.DS_Store
+Thumbs.db

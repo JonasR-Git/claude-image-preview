@@ -1,0 +1,32 @@
+name: Bug report
+description: Something does not show, shows wrong, or breaks.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected and what you saw instead. A screenshot helps.
+    validations:
+      required: true
+  - type: textarea
+    id: status
+    attributes:
+      label: Output of /image-preview status
+      description: Run it in the session where it happened, ideally while the tile shows the problem.
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: terminal
+    attributes:
+      label: Terminal
+      placeholder: e.g. Windows Terminal 1.22, Git Bash, iTerm2, kitty, VS Code's integrated terminal
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Overlay log (Windows, if the real picture is the problem)
+      description: The last lines of the overlay.log that /image-preview status names.
+      render: text

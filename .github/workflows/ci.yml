@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code@2.1.296
+      - name: Validate the manifest
+        run: claude plugin validate --strict .
+      - name: Run the tests
+        run: claude plugin test .
+      - name: Compile the Windows overlay helper
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $names = 'System.Windows.Forms', 'System.Drawing', 'PresentationCore', 'WindowsBase', 'System.Xaml', 'UIAutomationClient', 'UIAutomationTypes'
+          $references = @('System.dll', 'System.Core.dll') + @($names | ForEach-Object { [System.Reflection.Assembly]::LoadWithPartialName($_).Location })
+          $options = New-Object System.CodeDom.Compiler.CompilerParameters (, [string[]]$references)
+          $options.OutputAssembly = Join-Path $env:RUNNER_TEMP 'overlay.dll'
+          $options.CompilerOptions = '/target:library /optimize'
+          $built = (New-Object Microsoft.CSharp.CSharpCodeProvider).CompileAssemblyFromSource($options, [System.IO.File]::ReadAllText("$PWD\hooks\lib\platform\overlay.cs"))
+          $built.Errors | ForEach-Object { Write-Host "line $($_.Line): $($_.ErrorText)" }
+          if (@($built.Errors | Where-Object { -not $_.IsWarning }).Count -gt 0) { exit 1 }
+
+  format:
+    name: Formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npx --yes prettier@3.5.3 --check .

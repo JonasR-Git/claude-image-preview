@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security issue
+    url: https://github.com/JonasR-Git/claude-image-preview/security/advisories/new
+    about: Report a vulnerability privately, not as an issue.

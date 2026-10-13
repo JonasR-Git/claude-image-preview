@@ -1,0 +1,5 @@
+* text=auto eol=lf
+*.png binary
+*.dll binary
+tests/fixtures/images.ts linguist-generated=true
+hooks/lib/codec/vp8-tables.ts linguist-generated=true

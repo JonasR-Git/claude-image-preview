@@ -1,0 +1,4 @@
+.claude-plugin/types/
+tests/fixtures/
+hooks/lib/codec/vp8-tables.ts
+.claude/

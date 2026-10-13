@@ -1,0 +1,55 @@
+{
+  "name": "image-preview",
+  "displayName": "Image Preview",
+  "version": "1.1.0",
+  "description": "See the pictures in your prompt: thumbnails above the prompt for pastes, @-mentioned files and the clipboard, with the real picture laid over them on Windows, plus a gallery and clipboard paste and copy. Windows, macOS, Linux and WSL.",
+  "author": {
+    "name": "JonasR",
+    "url": "https://github.com/JonasR-Git"
+  },
+  "homepage": "https://github.com/JonasR-Git/claude-image-preview",
+  "repository": "https://github.com/JonasR-Git/claude-image-preview",
+  "license": "MIT",
+  "keywords": [
+    "images",
+    "screenshots",
+    "paste",
+    "clipboard",
+    "preview",
+    "thumbnails",
+    "gallery",
+    "windows",
+    "wsl",
+    "git-bash"
+  ],
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "renderer": {
+      "type": "string",
+      "title": "Thumbnail style",
+      "description": "auto: real pictures where Claude Code draws them (kitty, Ghostty), colored blocks elsewhere. pictures or blocks: always that style. off: no thumbnails above the prompt.",
+      "options": ["auto", "pictures", "blocks", "off"],
+      "default": "auto"
+    },
+    "tile_rows": {
+      "type": "number",
+      "title": "Thumbnail height",
+      "description": "How many rows a thumbnail may take above the prompt (2 to 32). More rows show more detail; thumbnails shrink when the band has less room.",
+      "min": 2,
+      "max": 32,
+      "default": 32
+    },
+    "overlay": {
+      "type": "boolean",
+      "title": "Real pictures over the blocks (Windows)",
+      "description": "Windows (console, Git Bash, Windows Terminal, VS Code, WezTerm, Alacritty): a small window lays each picture exactly over its colored blocks, at full resolution; a click opens it. Where a terminal tells nothing of its cells, it finds the tiles on screenshots of the terminal window, kept in memory only.",
+      "default": true
+    },
+    "read_previews": {
+      "type": "boolean",
+      "title": "Preview pictures Claude reads",
+      "description": "A small thumbnail under each picture Claude opens with the Read tool, such as a screenshot it took, and a place for it in the gallery. Off: those files are left alone.",
+      "default": true
+    }
+  }
+}

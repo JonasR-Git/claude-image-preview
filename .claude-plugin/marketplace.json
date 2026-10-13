@@ -1,0 +1,19 @@
+{
+  "name": "jonasr-plugins",
+  "owner": {
+    "name": "JonasR",
+    "url": "https://github.com/JonasR-Git"
+  },
+  "metadata": {
+    "description": "Claude Code plugins by JonasR"
+  },
+  "plugins": [
+    {
+      "name": "image-preview",
+      "source": "./",
+      "description": "See the pictures in your prompt: thumbnails above the prompt for pastes, @-mentioned files and the clipboard, with the real picture laid over them on Windows. Windows, macOS, Linux and WSL.",
+      "category": "productivity",
+      "tags": ["images", "screenshots", "clipboard", "preview", "windows"]
+    }
+  ]
+}
